@@ -303,7 +303,10 @@ async function callBuilder(mode, section, tier, studentInput){
     })
   });
   const data = await res.json();
-  if(!res.ok){ throw new Error(data.error || "Something went wrong."); }
+  if(!res.ok){
+    const msg = data.detail ? `${data.error} (${data.detail})` : (data.error || "Something went wrong.");
+    throw new Error(msg);
+  }
   return data.result;
 }
 
