@@ -170,6 +170,42 @@
   details.about summary{cursor:pointer;font-weight:bold;color:var(--navy);}
   details.about .inner{padding:10px 0;color:#333;}
 
+  .nav-group-label{
+    font-weight:bold;
+    font-size:12px;
+    color:var(--grey);
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    margin:14px 0 6px;
+  }
+  .nav-group-label:first-of-type{margin-top:0;}
+
+  .draft-bank-btn{
+    background:var(--navy);
+    color:var(--white);
+    border:1px solid var(--navy);
+    margin-bottom:18px;
+  }
+  .draft-bank-btn:hover{background:var(--navy-dark);}
+
+  .bank-item{
+    border-bottom:1px solid var(--line);
+    padding:10px 0;
+  }
+  .bank-item h3{font-size:14px;color:var(--navy);margin:0 0 4px;font-weight:bold;}
+  .bank-item p{font-size:14px;margin:0;white-space:pre-wrap;}
+  .bank-empty{color:var(--grey);}
+
+  @media print{
+    header, .setup-card, nav.sections, .nav-group-label,
+    .draft-bank-btn, details.about, .no-print { display:none !important; }
+    body{background:var(--white);}
+    .container{max-width:100%;padding:0;}
+    .panel{display:none !important; border:none; padding:0;}
+    .panel.active{display:block !important;}
+    .bank-item{break-inside:avoid;}
+  }
+
   @media (max-width:600px){
     .row{flex-direction:column;}
   }
@@ -186,7 +222,7 @@
 
 <div class="container">
 
-  <div class="bridge">
+  <div class="bridge no-print">
     <strong>What this tool is for:</strong> it helps you think and find better facts. It is not your marketing plan.
     Whatever you write in the boxes below, you still need to write — in your own words — into your actual workbook.
     Anything the AI gives you that's marked <strong>unverified</strong> must be checked before you use it.
@@ -208,7 +244,12 @@
     <p class="achieved-note" id="setupStatus"></p>
   </div>
 
-  <nav class="sections" id="sectionNav"></nav>
+  <p class="nav-group-label">Marketing Audit — Weeks 2&ndash;4</p>
+  <nav class="sections" id="auditNav"></nav>
+  <p class="nav-group-label">Marketing Strategy and Plan — Weeks 5&ndash;6</p>
+  <nav class="sections" id="strategyNav"></nav>
+
+  <button class="btn-secondary draft-bank-btn" id="draftBankBtn">View / print my draft bank</button>
 
   <div id="panels"></div>
 
@@ -268,11 +309,84 @@ const SECTIONS = {
     placeholder: "e.g. Strength: it's a well-known NZ brand. Not sure how to back that up with evidence yet",
     researchLead: false,
     maoriTip: null
+  },
+  objectives: {
+    label: "Marketing Objectives",
+    focus: "SMART marketing objectives, linked to corporate objectives and audit findings",
+    placeholder: "e.g. I want to increase sales but I'm not sure how to make that SMART yet",
+    researchLead: false,
+    maoriTip: null
+  },
+  product: {
+    label: "Marketing Mix: Product",
+    focus: "Features, branding, packaging, unique value proposition",
+    placeholder: "e.g. Bluebird Salt & Vinegar Chips 50g comes in a foil bag — not sure what actually makes it different from competitors",
+    researchLead: true,
+    maoriTip: "Could kaitiakitanga apply to a packaging or sourcing decision here — could the product do more to reduce waste or protect resources?"
+  },
+  price: {
+    label: "Marketing Mix: Price",
+    focus: "Pricing strategy, justification, competitor price comparison",
+    placeholder: "e.g. it's about $2.50 at the supermarket, not sure how that compares to competitors yet",
+    researchLead: true,
+    maoriTip: null
+  },
+  promotion: {
+    label: "Marketing Mix: Promotion",
+    focus: "Channels, content, frequency, justification",
+    placeholder: "e.g. I think they do TV ads and Instagram, not sure how often or what else",
+    researchLead: true,
+    maoriTip: "Does whanaungatanga or manaakitanga show up in how this business promotes itself — sponsorship, local events, genuine community presence?"
+  },
+  place: {
+    label: "Marketing Mix: Place",
+    focus: "Distribution channels and justification",
+    placeholder: "e.g. I know it's in supermarkets, not sure about dairies, petrol stations, or online",
+    researchLead: true,
+    maoriTip: null
+  },
+  forecast: {
+    label: "Sales Forecast",
+    focus: "Forecast with justification, grounded in audit data",
+    placeholder: "e.g. not sure how to forecast for a brand that's already big — feels different from a new business",
+    researchLead: false,
+    maoriTip: null
+  },
+  budget: {
+    label: "Marketing Budget",
+    focus: "Itemised costs, each justified against an expected outcome",
+    placeholder: "e.g. I have no idea what things actually cost, like running a social media campaign",
+    researchLead: true,
+    maoriTip: null
+  },
+  actionplan: {
+    label: "Action Plan and Timeline",
+    focus: "Realistic, specific implementation timeline",
+    placeholder: "e.g. I know roughly what I want to do but not when, or in what order",
+    researchLead: false,
+    maoriTip: null
+  },
+  monitoring: {
+    label: "Monitoring Plan",
+    focus: "What data, collected when, triggering what decision",
+    placeholder: "e.g. I was going to just check Instagram followers every month",
+    researchLead: false,
+    maoriTip: null
+  },
+  contingency: {
+    label: "Contingency Plans",
+    focus: "Measurable triggers and specific responses",
+    placeholder: "e.g. not sure what could go wrong or what we'd actually do about it",
+    researchLead: false,
+    maoriTip: null
   }
 };
 
 const TIERS = ["achieved","merit","excellence"];
 const TIER_LABELS = { achieved:"Achieved", merit:"Merit", excellence:"Excellence" };
+
+const AUDIT_KEYS = ["market","customer","competitor","environmental","swot"];
+const STRATEGY_KEYS = ["objectives","product","price","promotion","place","forecast","budget","actionplan","monitoring","contingency"];
 
 // ======================================================================
 // Storage helpers (per-device localStorage — this is individual work)
@@ -331,23 +445,27 @@ document.getElementById("saveSetupBtn").addEventListener("click", () => {
 // ======================================================================
 // Build nav + panels
 // ======================================================================
-const nav = document.getElementById("sectionNav");
+const auditNav = document.getElementById("auditNav");
+const strategyNav = document.getElementById("strategyNav");
 const panelsRoot = document.getElementById("panels");
 let activeSection = "market";
 
-Object.keys(SECTIONS).forEach((key) => {
+function addSectionButton(navEl, key){
   const btn = document.createElement("button");
   btn.textContent = SECTIONS[key].label;
   btn.dataset.section = key;
   btn.addEventListener("click", () => showSection(key));
-  nav.appendChild(btn);
+  navEl.appendChild(btn);
 
   const panel = document.createElement("div");
   panel.className = "panel";
   panel.id = "panel-" + key;
   panel.innerHTML = buildPanelHTML(key);
   panelsRoot.appendChild(panel);
-});
+}
+
+AUDIT_KEYS.forEach((key) => addSectionButton(auditNav, key));
+STRATEGY_KEYS.forEach((key) => addSectionButton(strategyNav, key));
 
 function buildPanelHTML(key){
   const s = SECTIONS[key];
@@ -386,6 +504,9 @@ function buildPanelHTML(key){
       <span class="step-label">3. Now write your own version (this is the bit that goes in your workbook)</span>
       <textarea id="answer-${key}" placeholder="Write your own sentence(s) here, in your own words."></textarea>
       <p class="achieved-note">Saved automatically on this device as you type.</p>
+      <button class="btn-secondary" data-action="paragraph_feedback" data-section="${key}" style="margin-top:6px;">Check my paragraph's length and structure</button>
+      <p class="achieved-note">This checks whether it reads as a connected paragraph and whether it's the right length for your chosen grade level. It won't rewrite it for you.</p>
+      <div id="out-paragraph_feedback-${key}"></div>
     </div>
   `;
 }
@@ -394,7 +515,7 @@ function showSection(key){
   activeSection = key;
   document.querySelectorAll("nav.sections button").forEach(b => b.classList.toggle("active", b.dataset.section===key));
   document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-"+key));
-  restoreDrafts(key);
+  if(key !== "draftbank") restoreDrafts(key);
 }
 
 function restoreDrafts(key){
@@ -408,6 +529,64 @@ function setTier(key, tier){
   document.querySelectorAll(`#tiertabs-${key} button`).forEach(b => b.classList.toggle("active", b.dataset.tier===tier));
   document.getElementById("polish-wrap-"+key).style.display = (tier==="achieved") ? "block" : "none";
   saveDraft(key,"any","tier",tier);
+}
+
+// ======================================================================
+// Draft bank — a compiled, printable view of the student's OWN written
+// answers only (never the AI coaching output). This is still a draft —
+// the real submission is the student's workbook, not this page.
+// ======================================================================
+const draftBankPanel = document.createElement("div");
+draftBankPanel.className = "panel";
+draftBankPanel.id = "panel-draftbank";
+panelsRoot.appendChild(draftBankPanel);
+
+document.getElementById("draftBankBtn").addEventListener("click", () => {
+  renderDraftBank();
+  activeSection = "draftbank";
+  document.querySelectorAll("nav.sections button").forEach(b => b.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-draftbank"));
+});
+
+function renderDraftBank(){
+  const product = getProduct() || "(no product set)";
+  const allKeys = [...AUDIT_KEYS, ...STRATEGY_KEYS];
+  const rows = allKeys.map(key => {
+    const answer = loadDraft(key, "any", "answer").trim();
+    return `
+      <div class="bank-item">
+        <h3>${SECTIONS[key].label}</h3>
+        <p>${answer ? escapeHtml(answer).replace(/\n/g,"<br>") : '<span class="bank-empty">Not written yet.</span>'}</p>
+      </div>`;
+  }).join("");
+
+  draftBankPanel.innerHTML = `
+    <h2>My draft bank — ${escapeHtml(product)}</h2>
+    <div class="bridge" style="margin-top:0;">
+      <strong>This is not your marketing plan.</strong> It's a compiled copy of what you've written in the "now write your own version" box for each section. Copy it into your Workbook, then keep developing it from there — your workbook draft, not this page, is what gets submitted.
+    </div>
+    <div class="row" style="margin-bottom:14px;">
+      <div><button class="btn-primary no-print" id="copyBankBtn">Copy all to clipboard</button></div>
+      <div><button class="btn-secondary no-print" id="printBankBtn">Print / save as PDF</button></div>
+    </div>
+    <p class="achieved-note no-print" id="bankCopyStatus"></p>
+    <div id="bankContent">${rows}</div>
+  `;
+
+  document.getElementById("copyBankBtn").addEventListener("click", async () => {
+    const plain = allKeys.map(key => {
+      const answer = loadDraft(key, "any", "answer").trim();
+      return `${SECTIONS[key].label}\n${answer || "(not written yet)"}`;
+    }).join("\n\n");
+    try{
+      await navigator.clipboard.writeText(`${product}\n\n${plain}`);
+      document.getElementById("bankCopyStatus").textContent = "Copied. Paste it into your Workbook.";
+    }catch(e){
+      document.getElementById("bankCopyStatus").textContent = "Couldn't copy automatically — select the text below and copy manually.";
+    }
+  });
+
+  document.getElementById("printBankBtn").addEventListener("click", () => window.print());
 }
 
 // raw + answer autosave
@@ -434,16 +613,34 @@ panelsRoot.addEventListener("click", async (e) => {
   if(!e.target.matches("[data-action]")) return;
   const action = e.target.dataset.action;
   const key = e.target.dataset.section;
-  const rawInput = document.getElementById("raw-"+key).value.trim();
+  const sourceBoxId = (action === "paragraph_feedback") ? "answer-"+key : "raw-"+key;
+  const inputValue = document.getElementById(sourceBoxId).value.trim();
   const tier = document.querySelector(`#tiertabs-${key} button.active`)?.dataset.tier || "achieved";
 
   if(!getPasscode() || !getProduct()){
     alert("Fill in the class passcode and your product in the setup box at the top first.");
     return;
   }
-  if(!rawInput){
-    alert("Add what you already know in the box above first.");
+  if(!inputValue){
+    const msg = (action === "paragraph_feedback")
+      ? "Write your own version in the box above first, then check it."
+      : "Add what you already know in the box above first.";
+    alert(msg);
     return;
+  }
+
+  // research_lead runs a live web search, which costs more than the other
+  // modes. A light speed bump on repeat use stops casual re-rolling from
+  // quietly eating the class budget, without blocking anyone who genuinely
+  // needs another look.
+  if(action === "research_lead"){
+    const usedKey = `rpb_leadused_${key}`;
+    if(localStorage.getItem(usedKey)){
+      const proceed = confirm("You've already pulled leads for this section. Searching again uses extra class budget — only do this if you genuinely need different leads. Continue?");
+      if(!proceed) return;
+    } else {
+      localStorage.setItem(usedKey, "1");
+    }
   }
 
   const outId = `out-${action}-${key}`;
@@ -452,7 +649,7 @@ panelsRoot.addEventListener("click", async (e) => {
   e.target.disabled = true;
 
   try{
-    const result = await callBuilder(action, key, tier, rawInput);
+    const result = await callBuilder(action, key, tier, inputValue);
     if(action === "research_lead"){
       outDiv.innerHTML = `<div class="ai-output lead"><span class="badge">UNVERIFIED — CHECK BEFORE USING</span><div>${escapeHtml(result).replace(/\n/g,"<br>")}</div></div>`;
     } else {
