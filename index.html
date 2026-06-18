@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en-NZ">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Research Plan Builder — AS91382 (3.4)</title>
+<style>
+  :root{
+    --navy:#162B4D;
+    --navy-dark:#0E1D38;
+    --blue:#2E5C9A;
+    --blue-light:#E8EEF7;
+    --amber:#B9772E;
+    --amber-bg:#FBF1E3;
+    --green:#3C8B5C;
+    --green-bg:#EAF6EF;
+    --purple:#6E4F9E;
+    --purple-bg:#F1ECF8;
+    --tip:#3A86C8;
+    --tip-bg:#EAF3FB;
+    --grey:#5B6472;
+    --line:#D8DEE6;
+    --bg:#F6F7F9;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:Calibri,'Calibri Light','Segoe UI',Arial,sans-serif;
+    background:var(--bg);
+    color:#1C2530;
+    line-height:1.5;
+  }
+  header{
+    background:var(--navy);
+    color:var(--white);
+    padding:22px 20px 18px;
+  }
+  header .wrap{max-width:980px;margin:0 auto;}
+  header h1{font-size:22px;margin:0 0 4px;font-weight:bold;}
+  header p{margin:0;font-size:14px;color:#C7D2E3;}
+  .container{max-width:980px;margin:0 auto;padding:20px;}
+
+  .bridge{
+    background:var(--green-bg);
+    border:1px solid var(--green);
+    border-radius:6px;
+    padding:12px 16px;
+    margin-bottom:18px;
+    font-size:14px;
+  }
+  .bridge strong{color:var(--green);}
+
+  .setup-card{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:18px;
+    margin-bottom:20px;
+  }
+  .setup-card h2{font-size:16px;color:var(--navy);margin:0 0 10px;font-weight:bold;}
+  label{display:block;font-weight:bold;font-size:13px;margin:10px 0 4px;color:var(--navy-dark);}
+  input[type=text], input[type=password], textarea{
+    width:100%;
+    font-family:Calibri,'Segoe UI',Arial,sans-serif;
+    font-size:14px;
+    padding:8px 10px;
+    border:1px solid var(--line);
+    border-radius:5px;
+    background:var(--white);
+    color:#1C2530;
+  }
+  textarea{resize:vertical;min-height:70px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}
+  .row > div{flex:1;min-width:200px;}
+
+  button{
+    font-family:Calibri,'Segoe UI',Arial,sans-serif;
+    font-weight:bold;
+    font-size:13px;
+    border:none;
+    border-radius:5px;
+    padding:9px 14px;
+    cursor:pointer;
+  }
+  .btn-primary{background:var(--blue);color:var(--white);}
+  .btn-primary:hover{background:var(--navy);}
+  .btn-secondary{background:var(--white);color:var(--blue);border:1px solid var(--blue);}
+  .btn-secondary:hover{background:var(--blue-light);}
+  button:disabled{opacity:0.5;cursor:not-allowed;}
+
+  nav.sections{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  nav.sections button{
+    background:var(--white);
+    color:var(--navy);
+    border:1px solid var(--line);
+    font-weight:bold;
+    padding:10px 14px;
+  }
+  nav.sections button.active{background:var(--navy);color:var(--white);border-color:var(--navy);}
+
+  .panel{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:20px;
+    margin-bottom:16px;
+    display:none;
+  }
+  .panel.active{display:block;}
+  .panel h2{font-size:18px;color:var(--navy);margin:0 0 4px;font-weight:bold;}
+  .panel .focus{font-size:13px;color:var(--grey);margin:0 0 16px;}
+
+  .step{border-top:1px solid var(--line);padding-top:14px;margin-top:14px;}
+  .step:first-of-type{border-top:none;margin-top:0;padding-top:0;}
+  .step-label{font-weight:bold;color:var(--navy);font-size:14px;margin-bottom:6px;display:block;}
+
+  .tier-tabs{display:flex;gap:6px;margin:6px 0 12px;}
+  .tier-tabs button{
+    background:var(--green-bg);
+    color:var(--green);
+    border:1px solid var(--green);
+    padding:6px 12px;
+    font-size:13px;
+  }
+  .tier-tabs button.active{background:var(--green);color:var(--white);}
+
+  .ai-output{
+    background:var(--tip-bg);
+    border-left:4px solid var(--tip);
+    border-radius:4px;
+    padding:10px 12px;
+    margin-top:10px;
+    font-size:14px;
+    white-space:pre-wrap;
+  }
+  .ai-output.lead{background:var(--amber-bg);border-left-color:var(--amber);}
+  .ai-output .badge{
+    display:inline-block;
+    font-weight:bold;
+    font-size:11px;
+    background:var(--amber);
+    color:var(--white);
+    padding:2px 7px;
+    border-radius:3px;
+    margin-bottom:6px;
+  }
+  .ai-output.lead{white-space:normal;}
+
+  .maori-tip{
+    background:var(--purple-bg);
+    border-left:4px solid var(--purple);
+    border-radius:4px;
+    padding:10px 12px;
+    margin-top:10px;
+    font-size:13px;
+    color:#3E2C5C;
+  }
+  .maori-tip strong{color:var(--purple);}
+
+  .loading{font-size:13px;color:var(--grey);margin-top:8px;}
+  .error-msg{
+    background:#FCEAEA;border-left:4px solid #C0392B;border-radius:4px;
+    padding:8px 12px;margin-top:8px;font-size:13px;color:#7A1F1F;
+  }
+
+  .achieved-note{font-size:12px;color:var(--grey);margin-top:6px;}
+
+  details.about{margin-top:24px;font-size:13px;}
+  details.about summary{cursor:pointer;font-weight:bold;color:var(--navy);}
+  details.about .inner{padding:10px 0;color:#333;}
+
+  @media (max-width:600px){
+    .row{flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Research Plan Builder</h1>
+    <p>AS91382 (3.4) — Marketing Audit support tool | Papatoetoe High School Business Studies</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="bridge">
+    <strong>What this tool is for:</strong> it helps you think and find better facts. It is not your marketing plan.
+    Whatever you write in the boxes below, you still need to write — in your own words — into your actual workbook.
+    Anything the AI gives you that's marked <strong>unverified</strong> must be checked before you use it.
+  </div>
+
+  <div class="setup-card" id="setupCard">
+    <h2>Before you start</h2>
+    <div class="row">
+      <div>
+        <label for="passcodeInput">Class passcode</label>
+        <input type="password" id="passcodeInput" placeholder="Ask your teacher">
+      </div>
+      <div>
+        <label for="productInput">Your business and product</label>
+        <input type="text" id="productInput" placeholder="e.g. Bluebird Salt &amp; Vinegar Chips 50g">
+      </div>
+    </div>
+    <button class="btn-primary" id="saveSetupBtn" style="margin-top:12px;">Save and start</button>
+    <p class="achieved-note" id="setupStatus"></p>
+  </div>
+
+  <nav class="sections" id="sectionNav"></nav>
+
+  <div id="panels"></div>
+
+  <details class="about">
+    <summary>How the AI in this tool works (and what it won't do)</summary>
+    <div class="inner">
+      <p>This tool will ask you questions to help you find better facts, and show you worked examples using a <strong>different</strong> NZ product so you can see how a fact turns into NCEA-style writing. At Achieved level only, it can tidy your own verified fact into one clean sentence — it will never add a number, name, or detail you didn't give it.</p>
+      <p>It will never write your Merit or Excellence reasoning for you, and it will never invent competitor details or market figures and present them as true. Anything it finds through a search is flagged <strong>unverified</strong> — that means go and check it yourself before it goes anywhere near your workbook.</p>
+    </div>
+  </details>
+
+</div>
+
+<script>
+// ======================================================================
+// CONFIG — fill this in once after you deploy the Worker (see SETUP_GUIDE)
+// ======================================================================
+const CONFIG = {
+  WORKER_URL: "https://PASTE-YOUR-WORKER-URL-HERE.workers.dev"
+};
+
+// ======================================================================
+// Section + content config — mirrors worker.js SECTIONS
+// ======================================================================
+const SECTIONS = {
+  market: {
+    label: "Market Analysis",
+    focus: "Market size, trends, and growth drivers",
+    placeholder: "e.g. Bluebird sells about 500,000 packs of chips a day in NZ",
+    researchLead: true,
+    maoriTip: "Does kaitiakitanga (guardianship of resources, sustainability) show up anywhere in how this business sources or sells this product? Only mention it if it's genuinely there."
+  },
+  customer: {
+    label: "Customer Analysis",
+    focus: "Demographics, psychographics, motivation, pain points, digital behaviour",
+    placeholder: "e.g. I think it's mostly bought by families and younger people who snack a lot, not sure on exact ages",
+    researchLead: false,
+    maoriTip: "Does manaakitanga (hospitality, care for others) show up in how this business treats its customers — packaging, service, community presence?"
+  },
+  competitor: {
+    label: "Competitor Analysis",
+    focus: "Direct competitors — product, price, promotion, distribution",
+    placeholder: "e.g. Bluebird Salt & Vinegar Chips 50g — not sure who else makes something similar",
+    researchLead: true,
+    maoriTip: null
+  },
+  environmental: {
+    label: "Environmental Analysis",
+    focus: "2-3 significant PESTLE factors and their specific impact",
+    placeholder: "e.g. I think there might be a sugar/salt tax conversation happening in NZ but I'm not sure",
+    researchLead: true,
+    maoriTip: "Could kaitiakitanga apply here — e.g. packaging waste, sustainable sourcing, environmental regulation?"
+  },
+  swot: {
+    label: "SWOT and Analysis Tools",
+    focus: "Strengths, weaknesses, opportunities, threats — each backed by evidence",
+    placeholder: "e.g. Strength: it's a well-known NZ brand. Not sure how to back that up with evidence yet",
+    researchLead: false,
+    maoriTip: null
+  }
+};
+
+const TIERS = ["achieved","merit","excellence"];
+const TIER_LABELS = { achieved:"Achieved", merit:"Merit", excellence:"Excellence" };
+
+// ======================================================================
+// Storage helpers (per-device localStorage — this is individual work)
+// ======================================================================
+function getPasscode(){ return localStorage.getItem("rpb_passcode") || ""; }
+function getProduct(){ return localStorage.getItem("rpb_product") || ""; }
+function saveDraft(section, tier, field, value){
+  localStorage.setItem(`rpb_${section}_${tier}_${field}`, value);
+}
+function loadDraft(section, tier, field){
+  return localStorage.getItem(`rpb_${section}_${tier}_${field}`) || "";
+}
+
+// ======================================================================
+// API call
+// ======================================================================
+async function callBuilder(mode, section, tier, studentInput){
+  const res = await fetch(CONFIG.WORKER_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Class-Passcode": getPasscode()
+    },
+    body: JSON.stringify({
+      mode, section, tier,
+      studentInput,
+      productContext: getProduct()
+    })
+  });
+  const data = await res.json();
+  if(!res.ok){ throw new Error(data.error || "Something went wrong."); }
+  return data.result;
+}
+
+// ======================================================================
+// Setup card
+// ======================================================================
+document.getElementById("passcodeInput").value = getPasscode();
+document.getElementById("productInput").value = getProduct();
+
+document.getElementById("saveSetupBtn").addEventListener("click", () => {
+  const pass = document.getElementById("passcodeInput").value.trim();
+  const product = document.getElementById("productInput").value.trim();
+  if(!pass || !product){
+    document.getElementById("setupStatus").textContent = "Add both your passcode and your product before starting.";
+    return;
+  }
+  localStorage.setItem("rpb_passcode", pass);
+  localStorage.setItem("rpb_product", product);
+  document.getElementById("setupStatus").textContent = "Saved. You're set up for " + product + ".";
+});
+
+// ======================================================================
+// Build nav + panels
+// ======================================================================
+const nav = document.getElementById("sectionNav");
+const panelsRoot = document.getElementById("panels");
+let activeSection = "market";
+
+Object.keys(SECTIONS).forEach((key) => {
+  const btn = document.createElement("button");
+  btn.textContent = SECTIONS[key].label;
+  btn.dataset.section = key;
+  btn.addEventListener("click", () => showSection(key));
+  nav.appendChild(btn);
+
+  const panel = document.createElement("div");
+  panel.className = "panel";
+  panel.id = "panel-" + key;
+  panel.innerHTML = buildPanelHTML(key);
+  panelsRoot.appendChild(panel);
+});
+
+function buildPanelHTML(key){
+  const s = SECTIONS[key];
+  return `
+    <h2>${s.label}</h2>
+    <p class="focus">${s.focus}</p>
+
+    ${s.maoriTip ? `<div class="maori-tip"><strong>Worth a thought:</strong> ${s.maoriTip}</div>` : ""}
+
+    <div class="step">
+      <span class="step-label">1. What do you already know?</span>
+      <textarea id="raw-${key}" placeholder="${s.placeholder}"></textarea>
+      <div class="row" style="margin-top:8px;">
+        <div><button class="btn-secondary" data-action="sharpen" data-section="${key}">Help me sharpen this</button></div>
+        ${s.researchLead ? `<div><button class="btn-secondary" data-action="research_lead" data-section="${key}">Find real leads to check</button></div>` : ""}
+      </div>
+      <div id="out-sharpen-${key}"></div>
+      <div id="out-research_lead-${key}"></div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">2. Pick the grade level you're aiming for</span>
+      <div class="tier-tabs" id="tiertabs-${key}">
+        ${TIERS.map(t => `<button data-tier="${t}" data-section="${key}">${TIER_LABELS[t]}</button>`).join("")}
+      </div>
+      <button class="btn-secondary" data-action="model" data-section="${key}">Show me how this becomes that level of writing</button>
+      <div id="out-model-${key}"></div>
+      <div id="polish-wrap-${key}" style="display:none;margin-top:10px;">
+        <button class="btn-primary" data-action="polish" data-section="${key}">Turn my checked fact into a sentence</button>
+        <p class="achieved-note">Achieved only — this just tidies wording. You still need to make sure the fact itself is right.</p>
+        <div id="out-polish-${key}"></div>
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-label">3. Now write your own version (this is the bit that goes in your workbook)</span>
+      <textarea id="answer-${key}" placeholder="Write your own sentence(s) here, in your own words."></textarea>
+      <p class="achieved-note">Saved automatically on this device as you type.</p>
+    </div>
+  `;
+}
+
+function showSection(key){
+  activeSection = key;
+  document.querySelectorAll("nav.sections button").forEach(b => b.classList.toggle("active", b.dataset.section===key));
+  document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-"+key));
+  restoreDrafts(key);
+}
+
+function restoreDrafts(key){
+  document.getElementById("raw-"+key).value = loadDraft(key,"any","raw");
+  document.getElementById("answer-"+key).value = loadDraft(key,"any","answer");
+  let tier = loadDraft(key,"any","tier") || "achieved";
+  setTier(key, tier);
+}
+
+function setTier(key, tier){
+  document.querySelectorAll(`#tiertabs-${key} button`).forEach(b => b.classList.toggle("active", b.dataset.tier===tier));
+  document.getElementById("polish-wrap-"+key).style.display = (tier==="achieved") ? "block" : "none";
+  saveDraft(key,"any","tier",tier);
+}
+
+// raw + answer autosave
+panelsRoot.addEventListener("input", (e) => {
+  if(e.target.id.startsWith("raw-")){
+    const key = e.target.id.replace("raw-","");
+    saveDraft(key,"any","raw", e.target.value);
+  }
+  if(e.target.id.startsWith("answer-")){
+    const key = e.target.id.replace("answer-","");
+    saveDraft(key,"any","answer", e.target.value);
+  }
+});
+
+// tier tab clicks
+panelsRoot.addEventListener("click", (e) => {
+  if(e.target.matches("[data-tier]")){
+    setTier(e.target.dataset.section, e.target.dataset.tier);
+  }
+});
+
+// action buttons
+panelsRoot.addEventListener("click", async (e) => {
+  if(!e.target.matches("[data-action]")) return;
+  const action = e.target.dataset.action;
+  const key = e.target.dataset.section;
+  const rawInput = document.getElementById("raw-"+key).value.trim();
+  const tier = document.querySelector(`#tiertabs-${key} button.active`)?.dataset.tier || "achieved";
+
+  if(!getPasscode() || !getProduct()){
+    alert("Fill in the class passcode and your product in the setup box at the top first.");
+    return;
+  }
+  if(!rawInput){
+    alert("Add what you already know in the box above first.");
+    return;
+  }
+
+  const outId = `out-${action}-${key}`;
+  const outDiv = document.getElementById(outId);
+  outDiv.innerHTML = `<p class="loading">Thinking...</p>`;
+  e.target.disabled = true;
+
+  try{
+    const result = await callBuilder(action, key, tier, rawInput);
+    if(action === "research_lead"){
+      outDiv.innerHTML = `<div class="ai-output lead"><span class="badge">UNVERIFIED — CHECK BEFORE USING</span><div>${escapeHtml(result).replace(/\n/g,"<br>")}</div></div>`;
+    } else {
+      outDiv.innerHTML = `<div class="ai-output">${escapeHtml(result)}</div>`;
+    }
+  } catch(err){
+    outDiv.innerHTML = `<div class="error-msg">${escapeHtml(err.message)}</div>`;
+  } finally {
+    e.target.disabled = false;
+  }
+});
+
+function escapeHtml(str){
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// init
+showSection("market");
+</script>
+
+</body>
+</html>
